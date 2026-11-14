@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#102a43">
+<title>My Lending Book</title>
+<style>
+:root{--navy:#102a43;--blue:#176b87;--bg:#f3f6f8;--card:#fff;--muted:#627d98;--green:#16845b;--red:#c0392b;--line:#e5edf2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#172b4d;font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--navy);color:white;padding:22px 18px 18px}header h1{margin:0;font-size:23px}header p{margin:4px 0 0;color:#c8d8e5;font-size:13px}
+main{max-width:760px;margin:auto;padding:14px 14px 40px}.tabs{display:flex;gap:8px;margin:0 0 14px;overflow:auto}.tab{border:0;border-radius:20px;padding:10px 15px;background:#e2eaf0;color:#27445d;font-weight:650;white-space:nowrap}.tab.active{background:var(--blue);color:white}
+.panel{display:none}.panel.active{display:block}.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:13px;box-shadow:0 2px 10px #16324f0b}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{background:#f6f9fb;border-radius:12px;padding:13px}.metric small{display:block;color:var(--muted);font-size:12px}.metric strong{font-size:20px;display:block;margin-top:5px;overflow-wrap:anywhere}
+h2{font-size:17px;margin:0 0 13px}label{display:block;font-size:12px;color:var(--muted);font-weight:650;margin:10px 0 5px}
+input,select,textarea{width:100%;border:1px solid #d5e0e8;border-radius:10px;padding:12px;background:white;font:inherit;color:#172b4d;min-height:44px}
+button.primary{border:0;background:var(--blue);color:white;border-radius:11px;padding:13px 16px;font:inherit;font-weight:700;width:100%;margin-top:13px}
+button.secondary,.smallbtn{border:1px solid #cbd8e2;background:white;color:#27445d;border-radius:9px;padding:8px 10px;font-weight:650}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.entry{padding:12px 0;border-bottom:1px solid var(--line)}.entry:last-child{border-bottom:0}.entry strong{display:block}.sub{font-size:12px;color:var(--muted);margin-top:3px}.amt{font-weight:750;white-space:nowrap}.lent{color:var(--red)}.paid{color:var(--green)}
+.pill{font-size:11px;border-radius:20px;background:#edf3f7;padding:4px 8px;color:#486581}
+.empty{text-align:center;color:var(--muted);padding:22px 8px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.hint{font-size:12px;color:var(--muted);line-height:1.5}
+@media(min-width:600px){main{padding-top:20px}.cards{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>My Lending Book</h1><p>Private friend-by-friend money tracker · AED + INR</p></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="dashboard">Overview</button>
+<button class="tab" data-tab="add">Add record</button>
+<button class="tab" data-tab="friends">Friends</button>
+<button class="tab" data-tab="history">History</button>
+<button class="tab" data-tab="backup">Backup</button>
+</div>
+<section id="dashboard" class="panel active">
+<div class="card"><h2>Your outstanding balance</h2><div class="cards">
+<div class="metric"><small>AED still owed</small><strong id="balAED">AED 0.00</strong></div>
+<div class="metric"><small>INR still owed</small><strong id="balINR">₹0.00</strong></div>
+<div class="metric"><small>Total lent · AED</small><strong id="lentAED">AED 0.00</strong></div>
+<div class="metric"><small>Total lent · INR</small><strong id="lentINR">₹0.00</strong></div>
+</div></div>
+<div class="card"><h2>Who owes you?</h2><div id="dashboardFriends" class="empty">No records yet. Add your first loan.</div></div>
+<div class="card"><p class="hint">AED and INR are kept separate. No exchange-rate conversion is applied. A repayment reduces the balance for that friend and currency.</p></div>
+</section>
+<section id="add" class="panel">
+<div class="card"><h2>Add a money record</h2>
+<label for="friend">Friend's name</label><input id="friend" list="friendOptions" placeholder="e.g. Ahmed" autocomplete="off"><datalist id="friendOptions"></datalist>
+<label for="type">Record type</label><select id="type"><option value="lent">I lent money</option><option value="paid">Friend repaid me</option></select>
+<label for="amount">Amount</label><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Enter amount">
+<label for="currency">Currency</label><select id="currency"><option value="AED">AED · UAE Dirham</option><option value="INR">INR · Indian Rupee</option></select>
+<label for="date">Date</label><input id="date" type="date">
+<label for="note">Note (optional)</label><input id="note" placeholder="e.g. Monthly repayment, cash, bank transfer">
+<button class="primary" id="save">Save record</button><p class="hint">For a repayment, choose the same friend and currency as the original loan.</p>
+</div></section>
+<section id="friends" class="panel"><div class="card"><h2>Friend balances</h2><div id="friendList" class="empty">No friends yet.</div></div></section>
+<section id="history" class="panel"><div class="card"><div class="row"><h2>Transaction history</h2><select id="historyFilter" style="width:auto;min-width:110px"><option value="all">All records</option><option value="lent">Lent</option><option value="paid">Repaid</option></select></div><div id="historyList" class="empty">No transactions yet.</div></div></section>
+<section id="backup" class="panel">
+<div class="card"><h2>Backup & privacy</h2><p class="hint">Your records are stored in this browser on this phone. They are not automatically synced to another device. Export a backup regularly, especially before clearing browser data or changing phones.</p>
+<button class="primary" id="export">Export backup file</button>
+<label for="importFile">Restore from backup</label><input type="file" id="importFile" accept=".json,application/json">
+<button class="secondary" id="clear" style="margin-top:14px;color:#a12b23">Delete all records</button>
+<p class="hint">Keep your backup file private. It contains your personal lending records.</p></div>
+</section>
+</main>
+<script>
+const KEY='myLendingBook_v1';let records=[];
+try{records=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(records))records=[]}catch(e){records=[]}
+const $=id=>document.getElementById(id);
+const money=(n,c)=>c==='AED'?'AED '+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const save=()=>localStorage.setItem(KEY,JSON.stringify(records));
+const balance=(name,c)=>records.filter(r=>r.name===name&&r.currency===c).reduce((s,r)=>s+(r.type==='lent'?r.amount:-r.amount),0);
+const totals=(type,c)=>records.filter(r=>r.type===type&&r.currency===c).reduce((s,r)=>s+r.amount,0);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+$('balAED').textContent=money(balanceAll('AED'),'AED');$('balINR').textContent=money(balanceAll('INR'),'INR');
+$('lentAED').textContent=money(totals('lent','AED'),'AED');$('lentINR').textContent=money(totals('lent','INR'),'INR');
+const names=[...new Set(records.map(r=>r.name))].sort((a,b)=>a.localeCompare(b));
+$('friendOptions').innerHTML=names.map(n=>`<option value="${esc(n)}">`).join('');
+$('dashboardFriends').innerHTML=names.length?names.map(n=>`<div class="entry row"><div><strong>${esc(n)}</strong><div class="sub">Outstanding</div></div><div style="text-align:right"><div class="amt">${money(balance(n,'AED'),'AED')}</div><div class="amt">${money(balance(n,'INR'),'INR')}</div></div></div>`).join(''):'<div class="empty">No records yet. Add your first loan.</div>';
+$('friendList').innerHTML=names.length?names.map(n=>`<div class="entry"><div class="row"><strong>${esc(n)}</strong><span class="pill">${records.filter(r=>r.name===n).length} records</span></div><div class="row" style="margin-top:8px"><span class="sub">AED outstanding</span><b>${money(balance(n,'AED'),'AED')}</b></div><div class="row"><span class="sub">INR outstanding</span><b>${money(balance(n,'INR'),'INR')}</b></div></div>`).join(''):'<div class="empty">No friends yet.</div>';
+const f=$('historyFilter').value;const list=[...records].reverse().filter(r=>f==='all'||r.type===f);
+$('historyList').innerHTML=list.length?list.map(r=>`<div class="entry"><div class="row"><div><strong>${esc(r.name)}</strong><div class="sub">${r.date} · ${r.type==='lent'?'Money lent':'Repayment received'}${r.note?' · '+esc(r.note):''}</div></div><div class="amt ${r.type==='lent'?'lent':'paid'}">${r.type==='lent'?'+':'−'}${money(r.amount,r.currency)}</div></div><div class="actions"><button class="smallbtn" data-delete="${r.id}">Delete record</button></div></div>`).join(''):'<div class="empty">No matching transactions.</div>';
+}
+function balanceAll(c){return records.filter(r=>r.currency===c).reduce((s,r)=>s+(r.type==='lent'?r.amount:-r.amount),0)}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));}));
+$('date').value=new Date().toISOString().slice(0,10);
+$('save').addEventListener('click',()=>{
+const name=$('friend').value.trim(),amount=Number($('amount').value),type=$('type').value,currency=$('currency').value,date=$('date').value,note=$('note').value.trim();
+if(!name){alert("Enter your friend's name.");return}if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero.');return}if(!date){alert('Choose a date.');return}
+if(type==='paid'&&balance(name,currency)<amount-0.000001){if(!confirm('This repayment is greater than the recorded outstanding balance for this friend and currency. Save anyway?'))return}
+records.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name,amount,type,currency,date,note});save();$('amount').value='';$('note').value='';render();document.querySelector('[data-tab="dashboard"]').click();alert('Record saved.');
+});
+$('historyFilter').addEventListener('change',render);
+$('historyList').addEventListener('click',e=>{const id=e.target.dataset.delete;if(!id)return;if(confirm('Delete this transaction? The balance will be recalculated.')){records=records.filter(r=>r.id!==id);save();render()}});
+$('export').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'My Lending Book',version:1,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-lending-book-backup.json';a.click();URL.revokeObjectURL(a.href)});
+$('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());const incoming=Array.isArray(data)?data:data.records;if(!Array.isArray(incoming)||!incoming.every(r=>r.name&&Number(r.amount)>0&&['AED','INR'].includes(r.currency)&&['lent','paid'].includes(r.type)&&r.date))throw Error();if(!confirm('Replace the records on this phone with '+incoming.length+' imported records?'))return;records=incoming;save();render();alert('Backup restored.')}catch(err){alert('That backup file is not valid. Your current records were not changed.')}e.target.value=''});
+$('clear').addEventListener('click',()=>{if(confirm('Permanently delete all records from this browser? Export a backup first if needed.')){records=[];save();render()}});
+render();
+</script>
+</body></html>
